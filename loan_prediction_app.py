@@ -56,21 +56,21 @@ ApplicantIncome = st.sidebar.number_input(
     min_value=0.0, 
     step=500.0, 
     value=5000.0, 
-    help="Enter the applicant's monthly income in Indian Rupees."
+    help="Enter the applicant's monthly income ."
 )
 CoapplicantIncome = st.sidebar.number_input(
     "Co-applicant Income", 
     min_value=0.0, 
     step=500.0, 
     value=2000.0, 
-    help="Enter the co-applicant's monthly income in Indian Rupees. Set to 0 if none."
+    help="Enter the co-applicant's monthly income. Set to 0 if none."
 )
 LoanAmount = st.sidebar.number_input(
     "Loan Amount (in thousands)", 
     min_value=0.0, 
     step=50.0, 
     value=150.0, 
-    help="Enter the desired loan amount in thousands of Rupees."
+    help="Enter the desired loan amount in thousands."
 )
 Loan_Amount_Term = st.sidebar.number_input(
     "Loan Amount Term (days)", 
