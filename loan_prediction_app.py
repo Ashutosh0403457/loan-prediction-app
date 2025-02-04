@@ -52,21 +52,21 @@ Education = st.sidebar.selectbox("Education", [0, 1], format_func=lambda x: "Gra
 Self_Employed = st.sidebar.selectbox("Self-Employed", [1, 0], format_func=lambda x: "Yes" if x == 1 else "No", help="Is the applicant self-employed?")
 
 ApplicantIncome = st.sidebar.number_input(
-    "Applicant Income (₹)", 
+    "Applicant Income", 
     min_value=0.0, 
     step=500.0, 
     value=5000.0, 
     help="Enter the applicant's monthly income in Indian Rupees."
 )
 CoapplicantIncome = st.sidebar.number_input(
-    "Co-applicant Income (₹)", 
+    "Co-applicant Income", 
     min_value=0.0, 
     step=500.0, 
     value=2000.0, 
     help="Enter the co-applicant's monthly income in Indian Rupees. Set to 0 if none."
 )
 LoanAmount = st.sidebar.number_input(
-    "Loan Amount (₹ in thousands)", 
+    "Loan Amount (in thousands)", 
     min_value=0.0, 
     step=50.0, 
     value=150.0, 
