@@ -4,10 +4,6 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-
-from sklearn.ensemble import RandomForestClassifier 
-
-from sklearn import metrics
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 # Load and preprocess dataset
@@ -38,24 +34,54 @@ model.fit(X_train, y_train)
 st.title("Loan Approval Prediction System")
 st.write("Enter applicant details below to predict the loan approval status.")
 
-# Input fields for applicant details
-col1, col2 = st.columns(2)
+# Sidebar for input fields and settings
+st.sidebar.title("Applicant Information")
 
-with col1:
-    Gender = st.selectbox("Gender", [1, 0], format_func=lambda x: "Male" if x == 1 else "Female")
-    Married = st.selectbox("Married", [1, 0], format_func=lambda x: "Yes" if x == 1 else "No")
-    Dependents = st.number_input("Number of Dependents", min_value=0, max_value=5, step=1)
-    Education = st.selectbox("Education", [0, 1], format_func=lambda x: "Graduate" if x == 0 else "Not Graduate")
-    Self_Employed = st.selectbox("Self-Employed", [1, 0], format_func=lambda x: "Yes" if x == 1 else "No")
+# Input fields in the sidebar with tooltips, defaults, and validations
+Gender = st.sidebar.selectbox("Gender", [1, 0], format_func=lambda x: "Male" if x == 1 else "Female", help="Select the gender of the applicant.")
+Married = st.sidebar.selectbox("Married", [1, 0], format_func=lambda x: "Yes" if x == 1 else "No", help="Is the applicant married?")
+Dependents = st.sidebar.number_input(
+    "Number of Dependents", 
+    min_value=0, 
+    max_value=5, 
+    step=1, 
+    value=0, 
+    help="Enter the number of dependents the applicant has."
+)
+Education = st.sidebar.selectbox("Education", [0, 1], format_func=lambda x: "Graduate" if x == 0 else "Not Graduate", help="Select the educational background of the applicant.")
+Self_Employed = st.sidebar.selectbox("Self-Employed", [1, 0], format_func=lambda x: "Yes" if x == 1 else "No", help="Is the applicant self-employed?")
 
-with col2:
-    ApplicantIncome = st.number_input("Applicant Income ", min_value=0.0, step=500.0)
-    CoapplicantIncome = st.number_input("Co-applicant Income ", min_value=0.0, step=500.0)
-    LoanAmount = st.number_input("Loan Amount (in thousands)", min_value=0.0, step=50.0)
-    Loan_Amount_Term = st.number_input("Loan Amount Term (in days)", min_value=0.0, step=12.0)
-    Credit_History = st.selectbox("Credit History", [1, 0], format_func=lambda x: "Yes" if x == 1 else "No")
+ApplicantIncome = st.sidebar.number_input(
+    "Applicant Income (₹)", 
+    min_value=0.0, 
+    step=500.0, 
+    value=5000.0, 
+    help="Enter the applicant's monthly income in Indian Rupees."
+)
+CoapplicantIncome = st.sidebar.number_input(
+    "Co-applicant Income (₹)", 
+    min_value=0.0, 
+    step=500.0, 
+    value=2000.0, 
+    help="Enter the co-applicant's monthly income in Indian Rupees. Set to 0 if none."
+)
+LoanAmount = st.sidebar.number_input(
+    "Loan Amount (₹ in thousands)", 
+    min_value=0.0, 
+    step=50.0, 
+    value=150.0, 
+    help="Enter the desired loan amount in thousands of Rupees."
+)
+Loan_Amount_Term = st.sidebar.number_input(
+    "Loan Amount Term (days)", 
+    min_value=12.0, 
+    step=12.0, 
+    value=360.0, 
+    help="Enter the loan repayment term in days. Default is 360 days."
+)
+Credit_History = st.sidebar.selectbox("Credit History", [1, 0], format_func=lambda x: "Yes" if x == 1 else "No", help="Does the applicant have a good credit history?")
 
-Property_Area = st.selectbox("Property Area", [0, 1, 2], format_func=lambda x: ["Rural", "Semiurban", "Urban"][x])
+Property_Area = st.sidebar.selectbox("Property Area", [0, 1, 2], format_func=lambda x: ["Rural", "Semiurban", "Urban"][x], help="Select the type of property area.")
 
 # Collect input data
 user_input = pd.DataFrame([{
@@ -73,11 +99,28 @@ user_input = pd.DataFrame([{
 }])
 
 # Prediction button
-if st.button("Predict Loan Status"):
-    scaled_input = scaler.transform(user_input)  # Scale user input
-    prediction = model.predict(scaled_input)  # Predict
-    result = "Approved" if prediction[0] == 1 else "Not Approved"
-    st.subheader("Prediction Result:")
-    st.success(f"The loan is {result}.")
+if st.sidebar.button("Predict Loan Status"):
+    # Validate inputs
+    if LoanAmount <= 0 or Loan_Amount_Term < 12:
+        st.error("Invalid inputs! Please ensure Loan Amount is positive and Loan Amount Term is at least 12 days.")
+    else:
+        # Scale user input
+        scaled_input = scaler.transform(user_input)
+        
+        # Predict
+        prediction = model.predict(scaled_input)
+        confidence = model.predict_proba(scaled_input)
 
+        result = "Approved" if prediction[0] == 1 else "Not Approved"
+        confidence_score = confidence[0][1] if prediction[0] == 1 else confidence[0][0]
 
+        # Display the result
+        st.subheader("Prediction Result:")
+        if result == "Approved":
+            st.success(f"✅ The loan is **{result}** with a confidence of **{confidence_score:.2f}**.")
+        else:
+            st.error(f"❌ The loan is **{result}** with a confidence of **{confidence_score:.2f}**.")
+
+        # Confidence chart
+        st.write("Confidence Levels:")
+        st.bar_chart({"Confidence": [confidence[0][0], confidence[0][1]]}, width=400)
